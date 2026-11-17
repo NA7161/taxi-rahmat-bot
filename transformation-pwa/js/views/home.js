@@ -150,7 +150,7 @@ export function render(root, ctx) {
   function drawPri() {
     const p = loadPri();
     priBox.replaceChildren(h('h2', { style: 'margin:0 0 10px;font-size:1.05rem' }, '🎯 Три приоритета дня'),
-      p.items.map((it, i) => {
+      ...p.items.map((it, i) => {
         const row = h('div', { class: 'hm-pri' + (it.done ? ' done' : '') });
         const cb = h('input', { type: 'checkbox', 'aria-label': 'Выполнено ' + (i + 1) });
         cb.checked = !!it.done;
@@ -189,7 +189,7 @@ export function render(root, ctx) {
     const have = earnedIds();
     achTitle.textContent = `Достижения · ${have.size}/${ACHIEVEMENTS.length}`;
     const sorted = [...ACHIEVEMENTS].sort((a, b) => (have.has(b.id) ? 1 : 0) - (have.has(a.id) ? 1 : 0));
-    achBox.replaceChildren(sorted.map(a => h('div', { class: 'card hm-a' + (have.has(a.id) ? '' : ' locked'), title: a.desc },
+    achBox.replaceChildren(...sorted.map(a => h('div', { class: 'card hm-a' + (have.has(a.id) ? '' : ' locked'), title: a.desc },
       h('span', { class: 'ai' }, a.icon), h('div', null, h('b', null, a.title), h('small', null, a.desc)))));
   }
 

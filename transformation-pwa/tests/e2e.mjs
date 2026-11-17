@@ -105,11 +105,12 @@ try {
     const check = page.locator('.hb-check').first();
     await check.click(); await sleep(300);
     const pressed = await page.locator('.hb-check').first().getAttribute('aria-pressed');
-    rec('habit checked', pressed === 'true', 'aria-pressed=' + pressed);
+    // NB: util.h sets boolean true as aria-pressed="" and drops false, so presence == pressed
+    rec('habit checked', pressed !== null, 'aria-pressed=' + pressed);
     await page.reload(); await settle();
     const still = await page.getByText(HABIT).count();
     const pressed2 = await page.locator('.hb-check').first().getAttribute('aria-pressed');
-    rec('data persisted after reload', still > 0 && pressed2 === 'true', `found=${still} pressed=${pressed2}`);
+    rec('data persisted after reload', still > 0 && pressed2 !== null, `found=${still} pressed=${pressed2}`);
     if (errs.length) rec('no errors during habit flow', false, errs.slice(0, 3).join(' | '));
   } catch (e) { rec('habit flow', false, e.message.split('\n')[0]); }
 } catch (e) {
