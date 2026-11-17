@@ -72,9 +72,16 @@ assert.deepEqual(ids(computeInsights(base(), now)), ['start']);
 // 6. слабая сфера без цели
 {
   const s = base(); s.gamify.events = [ev(0)];
-  s.plan.wheel = { health: 3, sport: 6, knowledge: 7, lang: 6, discipline: 5, finance: 6 };
+  s.plan.wheel = { health: 3, sport: 6, knowledge: 7, languages: 6, discipline: 5, finance: 6 };
   assert.match(computeInsights(s, now).find(i => i.id === 'wheel-gap').title, /Здоровье/);
   s.plan.goals = [{ id: 'g', sphere: 'health', done: false }];
+  assert.ok(!computeInsights(s, now).some(i => i.id === 'wheel-gap'));
+  // «Языки» (id languages) участвуют в сравнении и называются по-русски
+  s.plan.goals = [];
+  s.plan.wheel = { health: 6, sport: 6, knowledge: 7, languages: 2, discipline: 5, finance: 6 };
+  assert.match(computeInsights(s, now).find(i => i.id === 'wheel-gap').title, /Языки/);
+  // колесо не заполняли (везде одинаково) => ложной подсказки нет
+  s.plan.wheel = { health: 5, sport: 5, knowledge: 5, languages: 5, discipline: 5, finance: 5 };
   assert.ok(!computeInsights(s, now).some(i => i.id === 'wheel-gap'));
 }
 
