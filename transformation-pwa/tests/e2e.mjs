@@ -45,31 +45,26 @@ try {
     rec('open -> onboarding redirect to #/plan', hash.startsWith('#/plan'), `hash=${hash}`);
   } catch (e) { rec('open', false, e.message); }
 
-  // 2. onboarding: try to complete it through the UI; fallback: set store flag
-  let onboarded = false;
+  // 2. onboarding: real UI (name -> wheel -> goals -> finish); fallback: seed localStorage
+  const KEY = 'transformation.v1';
+  const isOnb = () => page.evaluate(k => { try { return !!JSON.parse(localStorage.getItem(k)).profile.onboarded; } catch { return false; } }, KEY);
+  let onboarded = false, how = 'UI';
   try {
-    const key = await page.evaluate(() => Object.keys(localStorage));
-    const btn = page.locator('main button, #app button').first();
-    if (await btn.count()) { /* best effort: click primary-looking buttons */
-      for (const t of [/начать|далее|продолж|готово|старт|сохран/i]) {
-        const b = page.getByRole('button', { name: t }).first();
-        for (let i = 0; i < 6 && await b.count() && await b.isVisible().catch(() => false); i++) { await b.click().catch(() => {}); await sleep(200); }
-      }
-    }
-    onboarded = await page.evaluate(() => {
-      for (const k of Object.keys(localStorage)) { try { const o = JSON.parse(localStorage[k]); if (o && o.profile && o.profile.onboarded) return true; } catch {} }
-      return false;
-    });
-    if (!onboarded) {
-      // fallback: flip the flag directly in whichever key holds the store
-      onboarded = await page.evaluate(() => {
-        for (const k of Object.keys(localStorage)) { try { const o = JSON.parse(localStorage[k]); if (o && o.profile) { o.profile.onboarded = true; localStorage[k] = JSON.stringify(o); return true; } } catch {} }
-        return false;
-      });
-      if (onboarded) { await page.reload(); await settle(); }
-    }
-    rec('onboarding done (via UI, else store flag fallback)', onboarded, onboarded ? (key.length ? 'keys=' + key.join(',') : '') : 'plan view not implemented yet or store key not found; keys=' + key.join(','));
-  } catch (e) { rec('onboarding', false, e.message); }
+    await page.locator('input[type=text]').first().fill('E2E');
+    await page.getByRole('button', { name: 'Далее' }).first().click(); await sleep(300);
+    await page.getByRole('button', { name: 'Далее' }).first().click(); await sleep(300);
+    const goalInp = page.locator('input[type=text]').first();
+    if (await goalInp.count()) await goalInp.fill('E2E цель');
+    await page.getByRole('button', { name: /Начать трансформацию/ }).click(); await sleep(500);
+    onboarded = await isOnb();
+    if (!onboarded) throw new Error('после прохождения UI profile.onboarded=false');
+  } catch (e) {
+    how = 'fallback seed (UI failed: ' + e.message.split('\n')[0] + ')';
+    await page.evaluate(k => localStorage.setItem(k, JSON.stringify({ profile: { name: 'E2E', onboarded: true, createdAt: new Date().toISOString() } })), KEY);
+    await page.goto(base + '#/home'); await page.reload(); await settle();
+    onboarded = await isOnb();
+  }
+  rec('onboarding done', how === 'UI' && onboarded, how === 'UI' ? '' : how);
 
   // 3. routes
   for (const r of ROUTES) {
@@ -91,29 +86,30 @@ try {
     } catch (e) { rec('route ' + r, false, 'exception: ' + e.message.split('\n')[0]); }
   }
 
-  // 4. habit create + check + persistence (best effort over unknown UI)
+  // 4. habit create + check + persistence
   errs = [];
   const HABIT = 'E2E привычка ' + Date.now();
   try {
     await page.goto(base + '#/habits'); await settle();
-    const addBtn = page.getByRole('button', { name: /добав|нов|созда|\+/i }).first();
-    if (!(await addBtn.count())) throw new Error('кнопка добавления привычки не найдена (view habits ещё не готов?)');
-    await addBtn.click(); await sleep(300);
-    const input = page.locator('input[type=text], input:not([type]), textarea').first();
-    if (!(await input.count())) throw new Error('поле ввода названия не найдено');
-    await input.fill(HABIT);
-    const save = page.getByRole('button', { name: /сохран|добав|созда|ok|готово/i }).last();
-    await save.click(); await sleep(400);
+    const add = page.getByRole('button', { name: /Добавить|Создать первую/ }).first();
+    if (!(await add.count())) throw new Error('кнопка добавления привычки не найдена');
+    await add.click(); await sleep(300);
+    await page.locator('input.input').first().fill(HABIT);
+    const chips = page.locator('.hb-chips button[aria-pressed="true"]');
+    if (!(await chips.count())) { // choose first day chip if none preselected
+      await page.locator('.hb-chips').last().locator('button').first().click();
+    }
+    await page.getByRole('button', { name: 'Сохранить' }).click(); await sleep(400);
     if (!(await page.getByText(HABIT).count())) throw new Error('созданная привычка не появилась в списке');
     rec('habit created', true);
-    const check = page.locator('input[type=checkbox], [role=checkbox], button.check, .check, button[aria-label*="тмет" i]').first();
-    if (!(await check.count())) throw new Error('элемент отметки не найден');
+    const check = page.locator('.hb-check').first();
     await check.click(); await sleep(300);
-    const before = await page.evaluate(() => JSON.stringify(localStorage));
-    rec('habit checked (UI click went through)', true);
+    const pressed = await page.locator('.hb-check').first().getAttribute('aria-pressed');
+    rec('habit checked', pressed === 'true', 'aria-pressed=' + pressed);
     await page.reload(); await settle();
     const still = await page.getByText(HABIT).count();
-    rec('data persisted after reload', still > 0 && (await page.evaluate(() => JSON.stringify(localStorage))).includes('E2E'), still ? '' : 'привычка пропала после перезагрузки');
+    const pressed2 = await page.locator('.hb-check').first().getAttribute('aria-pressed');
+    rec('data persisted after reload', still > 0 && pressed2 === 'true', `found=${still} pressed=${pressed2}`);
     if (errs.length) rec('no errors during habit flow', false, errs.slice(0, 3).join(' | '));
   } catch (e) { rec('habit flow', false, e.message.split('\n')[0]); }
 } catch (e) {
