@@ -12,6 +12,8 @@ export const ROUTES = [
   { id: 'workout', title: 'Спорт', icon: '💪', nav: true },
   { id: 'learn', title: 'Знания', icon: '🧠', nav: true },
   { id: 'more', title: 'Ещё', icon: '☰', nav: true },
+  { id: 'challenge', title: 'Челлендж 12 недель', icon: '🏆' },
+  { id: 'activity', title: 'Активность', icon: '📈' },
   { id: 'health', title: 'Здоровье', icon: '❤️' },
   { id: 'languages', title: 'Языки', icon: '🌍' },
   { id: 'plan', title: 'План', icon: '🎯' },
@@ -56,6 +58,9 @@ async function show() {
 
 nav.replaceChildren(...ROUTES.filter(r => r.nav).map(r =>
   h('a', { href: '#/' + r.id, 'data-id': r.id }, h('span', { class: 'ico', 'aria-hidden': 'true' }, r.icon), h('span', { class: 'lbl' }, r.title))));
+
+// Разовый переход на новое (тёмно-синее) оформление; дальше тема меняется только в настройках.
+if (!store.get().settings.lookV2) store.update(s => { s.settings.theme = 'dark'; s.settings.lookV2 = true; });
 
 // Тема и напоминания применяются при старте, не только при открытии настроек.
 {
