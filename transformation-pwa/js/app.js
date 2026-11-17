@@ -64,6 +64,18 @@ nav.replaceChildren(...ROUTES.filter(r => r.nav).map(r =>
   if (store.get().settings.reminders?.enabled) import('./reminders.js').then(m => m.startReminders()).catch(() => {});
 }
 
+// Хостинг (Netlify) может добавить плавающую плашку внизу страницы (iframe#nl-badge-frame).
+// Мы её не трогаем, а поднимаем навигацию над ней, чтобы кнопки меню не перекрывались.
+function fitBadge() {
+  const f = document.getElementById('nl-badge-frame');
+  let px = 0;
+  if (f) { const r = f.getBoundingClientRect(); if (r.height && r.bottom > innerHeight - 40) px = Math.ceil(innerHeight - r.top) + 4; }
+  document.documentElement.style.setProperty('--badge-h', px + 'px');
+}
+new MutationObserver(fitBadge).observe(document.body, { childList: true });
+addEventListener('resize', fitBadge);
+setTimeout(fitBadge, 600); setTimeout(fitBadge, 2000);
+
 addEventListener('hashchange', show);
 show();
 

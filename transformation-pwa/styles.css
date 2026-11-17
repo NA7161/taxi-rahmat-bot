@@ -51,7 +51,7 @@ body {
 }
 #app {
   max-width: 640px; margin: 0 auto; outline: none;
-  padding: 16px 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 24px);
+  padding: 16px 16px calc(var(--nav-h) + var(--badge-h, 0px) + env(safe-area-inset-bottom) + 24px);
   padding-top: calc(16px + env(safe-area-inset-top));
   min-height: 100vh; overflow-wrap: anywhere;
 }
@@ -128,7 +128,7 @@ input[type="checkbox"], input[type="radio"] { width: 24px; height: 24px; accent-
 
 /* Нижняя навигация */
 #nav {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex;
+  position: fixed; left: 0; right: 0; bottom: var(--badge-h, 0px); z-index: 50; display: flex;
   background: var(--surface); border-top: 1px solid var(--border);
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -146,7 +146,7 @@ input[type="checkbox"], input[type="radio"] { width: 24px; height: 24px; accent-
 #toasts {
   position: fixed; left: 0; right: 0; z-index: 100; display: flex; flex-direction: column;
   align-items: center; gap: 8px; pointer-events: none; padding: 0 16px;
-  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 12px);
+  bottom: calc(var(--nav-h) + var(--badge-h, 0px) + env(safe-area-inset-bottom) + 84px);
 }
 .toast {
   max-width: 480px; padding: 12px 16px; border-radius: var(--radius-sm); font-weight: 500;
@@ -180,3 +180,8 @@ input[type="checkbox"], input[type="radio"] { width: 24px; height: 24px; accent-
 
 /* Алиас для модулей: единый акцент */
 :root { --accent: var(--primary); }
+
+/* Ошибка поля формы */
+.field-error { color: var(--danger); font-weight: 600; margin: 6px 0 10px; min-height: 0; }
+.field-error:empty { display: none; }
+.input.invalid { border-color: var(--danger); box-shadow: 0 0 0 2px var(--danger); }

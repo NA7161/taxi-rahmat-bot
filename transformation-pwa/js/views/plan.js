@@ -151,15 +151,19 @@ export function render(root, ctx) {
     let body;
     if (ui.step === 0) {
       const inp = h('input', { class: 'input', type: 'text', placeholder: 'Как вас зовут?', maxlength: 40, value: ui.name, autocomplete: 'given-name' });
-      inp.addEventListener('input', () => { ui.name = inp.value; });
+      const nameErr = h('p', { class: 'field-error', role: 'alert' });
+      inp.addEventListener('input', () => { ui.name = inp.value; nameErr.textContent = ''; inp.classList.remove('invalid'); });
       body = h('div', { class: 'card plan-form' },
         h('h2', null, 'Давайте знакомиться'),
         h('p', null, 'Мы построим ваш план на 90 дней: оценим баланс жизни и поставим 1-3 главные цели.'),
-        inp,
+        inp, nameErr,
         h('button', {
           class: 'btn btn-primary', type: 'button',
           onclick: () => {
-            if (!ui.name.trim()) { toast('Введите имя'); return; }
+            if (!ui.name.trim()) {
+              nameErr.textContent = 'Введите имя, чтобы продолжить';
+              inp.classList.add('invalid'); inp.focus(); return;
+            }
             ui.name = ui.name.trim(); ui.step = 1; redraw();
           },
         }, 'Далее'));
@@ -175,12 +179,13 @@ export function render(root, ctx) {
           h('button', { class: 'btn btn-primary', type: 'button', onclick: () => { ui.step = 2; redraw(); } }, 'Далее')));
     } else {
       const lowest = SPHERES.slice().sort((a, b) => ui.wheel[a.id] - ui.wheel[b.id])[0];
+      const goalErr = h('p', { class: 'field-error', role: 'alert' });
       body = h('div', { class: 'card plan-form' },
         h('h2', null, 'Цели на 90 дней'),
         h('p', null, `Самая слабая сфера сейчас: ${lowest.icon} ${lowest.name}. Поставьте от 1 до 3 целей.`),
         ui.drafts.map((d, i) => {
-          const inp = h('input', { class: 'input', type: 'text', maxlength: 120, placeholder: `Цель ${i + 1}, например: пробежать 5 км`, value: d.title });
-          inp.addEventListener('input', () => { d.title = inp.value; });
+          const inp = h('input', { class: 'input goal-input', type: 'text', maxlength: 120, placeholder: `Цель ${i + 1}, например: пробежать 5 км`, value: d.title });
+          inp.addEventListener('input', () => { d.title = inp.value; inp.classList.remove('invalid'); goalErr.textContent = ''; });
           const chips = h('div');
           const drawChips = () => chips.replaceChildren(sphereChips(d.sphere, id => { d.sphere = id; drawChips(); }));
           drawChips();
@@ -190,16 +195,22 @@ export function render(root, ctx) {
           class: 'btn', type: 'button',
           onclick: () => { ui.drafts.push({ title: '', sphere: lowest.id }); redraw(); },
         }, '+ Ещё цель') : null,
+        goalErr,
         h('div', { class: 'plan-actions' },
           h('button', { class: 'btn', type: 'button', onclick: () => { ui.step = 1; redraw(); } }, 'Назад'),
-          h('button', { class: 'btn btn-primary', type: 'button', onclick: finishOnboarding }, 'Начать трансформацию')));
+          h('button', { class: 'btn btn-primary', type: 'button', onclick: () => finishOnboarding(goalErr) }, 'Начать трансформацию')));
     }
     return h('div', { class: 'plan-wrap' }, head, body);
   }
 
-  function finishOnboarding() {
+  function finishOnboarding(goalErr) {
     const goals = ui.drafts.filter(d => d.title.trim()).slice(0, 3);
-    if (!goals.length) { toast('Добавьте хотя бы одну цель'); return; }
+    if (!goals.length) {
+      goalErr.textContent = 'Напишите хотя бы одну цель, например: пробежать 5 км';
+      const first = document.querySelector('.goal-input');
+      if (first) { first.classList.add('invalid'); first.focus(); }
+      return;
+    }
     const due = addDays(today(), 90);
     store.update(s => {
       s.profile.name = ui.name.trim();
