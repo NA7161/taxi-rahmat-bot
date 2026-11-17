@@ -173,7 +173,7 @@ export function render(root, ctx) {
   let draft = null; // {key, reps, kg}
   let pick = new Set();
   let equipFilter = 'all';
-  let confirmReset = false;
+  let view = 'main';
 
   const stopTimer = () => { if (timerId) { clearInterval(timerId); timerId = null; } };
   const S = () => store.get();
@@ -195,6 +195,7 @@ export function render(root, ctx) {
       };
     });
     draft = null;
+    view = 'run';
     draw();
   }
 
@@ -222,6 +223,7 @@ export function render(root, ctx) {
       toast(newRec.length ? `Тренировка сохранена. Новый рекорд: ${newRec[0]}` : `Тренировка сохранена. +${XP_WORKOUT} XP`, 3200);
     }
     tab = 'history';
+    view = 'main';
     draw();
   }
 
@@ -346,7 +348,7 @@ export function render(root, ctx) {
     const out = [];
     if (a) {
       out.push(h('div', { class: 'card' }, h('strong', null, 'Тренировка идёт: ' + a.name),
-        h('div', { class: 'row' }, h('button', { class: 'btn btn-primary', type: 'button', onclick: draw }, 'Продолжить'),
+        h('div', { class: 'row' }, h('button', { class: 'btn btn-primary', type: 'button', onclick: () => { view = 'run'; draw(); } }, 'Продолжить'),
           h('button', { class: 'btn', type: 'button', onclick: cancel }, 'Отменить'))));
     }
     out.push(h('h2', null, 'Программы'), h('div', { class: 'wk-small' }, 'Full-body, 3 дня в неделю, без оборудования. Через каждые 3 тренировки цель по повторам растёт.'));
@@ -414,19 +416,13 @@ export function render(root, ctx) {
     stopTimer();
     root.replaceChildren();
     const a = active();
-    if (a && tab === 'run') return drawRun(a);
-    if (a && a.startedAt && tab !== 'programs' && tab !== 'history' && tab !== 'records') return drawRun(a);
+    if (!a) view = 'main';
+    if (view === 'run') return drawRun(a);
     drawMain();
   }
 
   // Вход: если тренировка уже идёт, сразу к ней (восстановление после перезагрузки).
-  tab = active() ? 'run' : 'programs';
-  const origDraw = draw;
-  draw = function () { // eslint-disable-line no-func-assign
-    if (active()) { if (tab !== 'programs' && tab !== 'history' && tab !== 'records') tab = 'run'; }
-    else if (tab === 'run') tab = 'programs';
-    origDraw();
-  };
+  view = active() ? 'run' : 'main';
   draw();
   return stopTimer;
 }

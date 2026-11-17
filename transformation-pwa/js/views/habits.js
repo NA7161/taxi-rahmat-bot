@@ -50,8 +50,8 @@ function percent(hs, item, days) {
   let sched = 0, done = 0, k = today();
   const start = startKey(item);
   for (let i = 0; i < days; i++, k = addDays(k, -1)) {
-    if (k < start) break;
     const d = isDone(hs, item, k);
+    if (k < start && !d) continue;
     if (isScheduled(item, k)) { sched++; if (d) done++; }
     else if (d) { sched++; done++; }
   }
@@ -250,8 +250,8 @@ export function render(root, ctx) {
       if (k > t) { cells.push(h('div', { class: 'hb-cell fut', title: k })); continue; }
       let sched = 0, done = 0;
       for (const it of sel) {
-        if (k < startKey(it)) continue;
         const d = isDone(hs, it, k);
+        if (k < startKey(it) && !d) continue;
         if (isScheduled(it, k) || d) { sched++; if (d) done++; }
       }
       const r = sched ? done / sched : 0;

@@ -57,6 +57,13 @@ async function show() {
 nav.replaceChildren(...ROUTES.filter(r => r.nav).map(r =>
   h('a', { href: '#/' + r.id, 'data-id': r.id }, h('span', { class: 'ico', 'aria-hidden': 'true' }, r.icon), h('span', { class: 'lbl' }, r.title))));
 
+// Тема и напоминания применяются при старте, не только при открытии настроек.
+{
+  const t = store.get().settings.theme;
+  if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+  if (store.get().settings.reminders?.enabled) import('./reminders.js').then(m => m.startReminders()).catch(() => {});
+}
+
 addEventListener('hashchange', show);
 show();
 
