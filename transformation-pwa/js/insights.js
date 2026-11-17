@@ -6,7 +6,7 @@ import { dateKey, addDays } from './util.js';
 const toUTC = k => { const [y, m, d] = k.split('-').map(Number); return Date.UTC(y, m - 1, d); };
 const dayDiff = (a, b) => Math.round((toUTC(b) - toUTC(a)) / 864e5);
 const WEEKDAY_IN = ['в воскресенье', 'в понедельник', 'во вторник', 'в среду', 'в четверг', 'в пятницу', 'в субботу'];
-const SPHERE = { health: 'Здоровье', sport: 'Спорт', knowledge: 'Знания', lang: 'Языки', discipline: 'Дисциплина', finance: 'Финансы' };
+const SPHERE = { health: 'Здоровье', sport: 'Спорт', knowledge: 'Знания', languages: 'Языки', discipline: 'Дисциплина', finance: 'Финансы' };
 const GAP_DAYS = 5;
 
 const keys = o => Object.keys(o || {});
@@ -120,7 +120,9 @@ export function computeInsights(state, now = new Date()) {
   // 6. колесо баланса против целей
   const wheel = (state.plan && state.plan.wheel) || {}, goals = (state.plan && state.plan.goals) || [];
   const scored = Object.entries(wheel).filter(([k, v]) => SPHERE[k] && typeof v === 'number');
-  if (scored.length >= 4) {
+  // Если все оценки одинаковы (колесо не заполняли, по умолчанию везде 5), «слабой» сферы нет
+  const spread = scored.length ? Math.max(...scored.map(c => c[1])) - Math.min(...scored.map(c => c[1])) : 0;
+  if (scored.length >= 4 && spread > 0) {
     const [wk, wv] = scored.reduce((m, c) => (c[1] < m[1] ? c : m));
     if (wv <= 5 && !goals.some(g => g.sphere === wk && !g.done)) add({ id: 'wheel-gap', icon: '🎯', tone: 'info', title: `Слабая сфера без цели: ${SPHERE[wk]}`,
       text: `Оценка ${wv} из 10, и нет активной цели в этой сфере. Поставьте одну небольшую.`, href: '#/plan', prio: 40 });
