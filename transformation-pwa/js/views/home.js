@@ -1,6 +1,7 @@
 // Экран «Сегодня». Свои стили в #home-css.
 import { h, today, addDays, dateKey } from '../util.js';
 import { ACHIEVEMENTS, earnedIds, checkAchievements } from '../gamify.js';
+import { computeInsights } from '../insights.js';
 
 const QUOTES = [
   'Дисциплина — это обещание, которое ты выполняешь, когда никто не смотрит.',
@@ -139,6 +140,7 @@ export function render(root, ctx) {
   const heroBox = h('div', { class: 'card hm-hero' });
   const priBox = h('div', { class: 'card' });
   const modBox = h('div', { class: 'hm-tiles' });
+  const tipBox = h('div');
   const chartBox = h('div', { class: 'card' });
   const achBox = h('div', { class: 'hm-ach' });
   const achTitle = h('h2', null, 'Достижения');
@@ -148,7 +150,7 @@ export function render(root, ctx) {
     return svg('svg', { class: 'hm-ring', viewBox: '0 0 96 96', role: 'img', 'aria-label': `Уровень ${level}, ${xpText}` },
       svg('circle', { class: 'trk', cx: 48, cy: 48, r: R, fill: 'none', 'stroke-width': 8 }),
       svg('circle', { class: 'val', cx: 48, cy: 48, r: R, fill: 'none', 'stroke-width': 8, 'stroke-linecap': 'round',
-        'stroke-dasharray': C.toFixed(1), 'stroke-dashoffset': (C * (1 - pct / 100)).toFixed(1), transform: 'rotate(-90 48 48)' }),
+        'stroke-dasharray': C.toFixed(1), 'stroke-dashoffset': (C * (1 - pct / 100)).toFixed(1), transform: 'rotate(-90 48 48)', style: `--c:${C.toFixed(1)}` }),
       svg('text', { class: 'lv', x: 48, y: 52, 'text-anchor': 'middle' }, level),
       svg('text', { class: 'xp', x: 48, y: 66, 'text-anchor': 'middle' }, xpText));
   }
@@ -162,6 +164,16 @@ export function render(root, ctx) {
         h('div', { class: 'hm-sub' }, new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })),
         h('span', { class: 'hm-badge' }, li.title || `Уровень ${li.level}`)),
       ring(pct, li.level, `${li.xpInLevel}/${li.xpForNext} XP`));
+  }
+
+  function drawTips() {
+    const tips = computeInsights(store.get(), new Date()).filter(t => t.id !== 'start').slice(0, 3);
+    if (!tips.length) { tipBox.replaceChildren(); return; }
+    tipBox.replaceChildren(h('h2', null, 'Подсказки'),
+      h('div', { class: 'list' }, tips.map(t => h('a', { class: `card tip ${t.tone}`, href: t.href || '#/insights' },
+        h('span', { class: 'ico', 'aria-hidden': 'true' }, t.icon),
+        h('span', null, h('strong', null, t.title), h('br'), h('span', { class: 'hm-sub' }, t.text))))),
+      h('a', { class: 'btn btn-ghost', href: '#/insights' }, 'Все подсказки'));
   }
 
   function drawPri() {
@@ -180,7 +192,7 @@ export function render(root, ctx) {
           const was = it.done; it.done = cb.checked; savePri(p);
           row.classList.toggle('done', it.done);
           count.textContent = `${p.items.filter(x => x.done).length}/${p.items.length}`;
-          if (it.done && !was && !it.rewarded) { it.rewarded = true; savePri(p); gamify.awardXP(5, 'Приоритет дня'); drawHero(); drawChart(); }
+          if (it.done && !was && !it.rewarded) { it.rewarded = true; savePri(p); gamify.awardXP(5, 'Приоритет дня'); drawHero(); drawTips(); drawChart(); }
         });
         row.append(cb, inp);
         return row;
@@ -219,11 +231,11 @@ export function render(root, ctx) {
   }
 
   const q = QUOTES[Math.floor(new Date().setHours(0, 0, 0, 0) / 864e5) % QUOTES.length];
-  root.append(heroBox, h('h2', null, 'Сегодня'), modBox, h('div', { style: 'height:12px' }), priBox,
+  root.append(heroBox, tipBox, h('h2', null, 'Сегодня'), modBox, h('div', { style: 'height:12px' }), priBox,
     h('div', { class: 'card' }, h('p', { class: 'hm-quote' }, '«' + q + '»')),
     h('h2', null, 'Неделя'), chartBox, achTitle, achBox);
 
   checkAchievements();
-  drawHero(); drawPri(); drawMods(); drawChart(); drawAch();
+  drawHero(); drawTips(); drawPri(); drawMods(); drawChart(); drawAch();
   return () => { dead = true; };
 }

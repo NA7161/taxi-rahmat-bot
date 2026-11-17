@@ -55,7 +55,7 @@ export function render(root, ctx) {
   root.append(style, h('h1', null, 'Настройки'), view);
 
   function draw() {
-    view.replaceChildren(themeSec(), profileSec(), remindSec(), dataSec(), aboutSec());
+    view.replaceChildren(themeSec(), feelSec(), profileSec(), remindSec(), dataSec(), aboutSec());
   }
 
   function themeSec() {
@@ -63,6 +63,16 @@ export function render(root, ctx) {
       h('div', { class: 'set-row' }, THEMES.map(([v, l]) =>
         h('button', { class: 'chip' + (S().theme === v ? ' set-on' : ''), type: 'button', 'aria-pressed': String(S().theme === v),
           onclick: () => { store.update(s => { s.settings.theme = v; }); applyTheme(); draw(); } }, l))));
+  }
+
+  function feelSec() {
+    const on = store.get().settings.haptics !== false;
+    const supported = typeof navigator.vibrate === 'function';
+    return h('section', { class: 'card set-sec' }, h('h2', null, 'Отклик'),
+      h('div', { class: 'set-row' },
+        h('button', { class: 'chip' + (on ? ' set-on' : ''), type: 'button', 'aria-pressed': String(on),
+          onclick: () => { store.update(s => { s.settings.haptics = !on; }); draw(); } }, on ? 'Вибро-отклик: вкл' : 'Вибро-отклик: выкл')),
+      h('p', { class: 'muted' }, supported ? 'Короткая вибрация при нажатиях и начислении XP.' : 'В этом браузере вибрация недоступна (например, на iPhone в Safari).'));
   }
 
   function profileSec() {

@@ -4,7 +4,7 @@ const MONTHS = ['января', 'февраля', 'марта', 'апреля', 
 
 export function render(root, ctx) {
   const { store, util: { h, today, addDays, dateKey } } = ctx;
-  let range = 14, limit = 40;
+  let range = 14, limit = 40, query = '';
 
   const dayName = k => {
     if (k === today()) return 'Сегодня';
@@ -35,11 +35,13 @@ export function render(root, ctx) {
 
   function draw() {
     root.replaceChildren();
-    const events = (store.get().gamify.events || []).slice().sort((a, b) => b.t - a.t);
+    const all = (store.get().gamify.events || []).slice().sort((a, b) => b.t - a.t);
+    const q = query.trim().toLowerCase();
+    const events = q ? all.filter(e => (e.reason || '').toLowerCase().includes(q)) : all;
     const days = [];
     for (let i = range - 1; i >= 0; i--) days.push(addDays(today(), -i));
     const by = {};
-    for (const e of events) { const k = dateKey(new Date(e.t)); by[k] = (by[k] || 0) + (e.xp || 0); }
+    for (const e of all) { const k = dateKey(new Date(e.t)); by[k] = (by[k] || 0) + (e.xp || 0); }
     const values = days.map(d => by[d] || 0);
     const sum = values.reduce((a, b) => a + b, 0), active = values.filter(v => v > 0).length;
 
@@ -51,10 +53,16 @@ export function render(root, ctx) {
         chart(days, values),
         h('p', { class: 'ch-sub' }, `За ${range} дн.: ${sum} XP, активных дней: ${active} из ${range}.`)));
 
-    if (!events.length) {
-      root.append(h('div', { class: 'card' }, h('p', null, 'Пока нет записей. Отметьте привычку, пройдите урок или тренировку, и действия появятся здесь.')));
+    if (!all.length) {
+      root.append(h('div', { class: 'card empty' }, h('div', { class: 'empty-ico', 'aria-hidden': 'true' }, '🌱'),
+        h('strong', null, 'Здесь пока пусто'), h('p', { class: 'ch-sub' }, 'Отметьте привычку, пройдите урок или тренировку, и действия появятся в ленте.'),
+        h('a', { class: 'btn btn-primary', href: '#/habits' }, 'К привычкам')));
       return;
     }
+    const search = h('input', { type: 'search', class: 'input', placeholder: 'Поиск по ленте (например, Тренировка)', 'aria-label': 'Поиск по ленте', value: query });
+    search.addEventListener('input', () => { root.classList.add('no-anim'); query = search.value; limit = 40; const pos = search.selectionStart; draw(); const n = root.querySelector('input[type=search]'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } });
+    root.append(search);
+    if (!events.length) { root.append(h('p', { class: 'ch-sub' }, `Ничего не найдено по запросу «${query}».`)); return; }
     const feed = h('div');
     let lastDay = '';
     let ul = null;
@@ -73,4 +81,5 @@ export function render(root, ctx) {
     if (events.length > limit) root.append(h('button', { class: 'btn', type: 'button', onclick: () => { limit += 40; draw(); } }, `Показать ещё (${events.length - limit})`));
   }
   draw();
+  return () => root.classList.remove('no-anim');
 }

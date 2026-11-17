@@ -279,3 +279,35 @@ input[type="checkbox"]:checked::after {
 
 #toasts { bottom: calc(var(--nav-h) + var(--badge-h, 0px) + env(safe-area-inset-bottom) + 14px); }
 .toast { border-radius: 14px; font-weight: 600; box-shadow: 0 12px 28px -10px rgba(0, 0, 0, .55); }
+
+/* ===== Движение и отклик, как в нативных приложениях ===== */
+@keyframes view-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes ring { from { stroke-dashoffset: var(--c); } }
+@keyframes pop { 0% { transform: scale(.7); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+@keyframes sheet-in { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+#app.enter { animation: view-in .26s cubic-bezier(.2, .8, .2, 1); }
+#app.enter > .card, #app.enter > .list > .card, #app.enter > .grid-2 > .card, #app.enter > div > .card { animation: rise .38s cubic-bezier(.2, .8, .2, 1) both; }
+#app.enter > :nth-child(2) { animation-delay: .04s; }
+#app.enter > :nth-child(3) { animation-delay: .08s; }
+#app.enter > :nth-child(4) { animation-delay: .12s; }
+#app.enter > :nth-child(5) { animation-delay: .16s; }
+
+.hm-ring .val { animation: ring 1s cubic-bezier(.2, .8, .2, 1) both; }
+.mini > i, .ch-bar > i, .progress > div, .hm-track > .hm-fill { transform-origin: left; animation: grow .7s cubic-bezier(.2, .8, .2, 1) both; }
+.ch-chart .b, .hm-bar { transform-box: fill-box; transform-origin: bottom; animation: grow-y .6s cubic-bezier(.2, .8, .2, 1) both; }
+input[type="checkbox"]:checked { animation: pop .25s ease-out; }
+.sheet { animation: sheet-in .25s cubic-bezier(.2, .8, .2, 1); }
+a.card:active, .chip:active, #nav a:active, .btn-ghost:active { transform: scale(.97); }
+
+/* Подсказки и пустые состояния */
+.tip { display: flex; align-items: center; gap: 12px; border-left: 4px solid var(--primary); }
+.tip.warn { border-left-color: var(--highlight); }
+.tip.good { border-left-color: var(--success); }
+.empty { text-align: center; padding: 28px 18px; display: grid; gap: 8px; justify-items: center; }
+.empty-ico { font-size: 2.6rem; line-height: 1; }
+
+#app.no-anim, #app.no-anim * { animation: none !important; }

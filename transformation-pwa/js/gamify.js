@@ -1,6 +1,7 @@
 // Геймификация: XP, уровни, достижения. Владелец: этот файл.
 import { store } from './store.js';
 import { dateKey, addDays, toast } from './util.js';
+import { haptic } from './haptics.js';
 
 export const LEVEL_TITLES = ['Новичок', 'Ученик', 'Практик', 'Стойкий', 'Мастер привычек', 'Воин дисциплины', 'Наставник', 'Эксперт', 'Мудрец', 'Легенда'];
 
@@ -12,6 +13,7 @@ export function awardXP(amount, reason) {
     s.gamify.events.push({ t: Date.now(), xp: amount, reason });
     if (s.gamify.events.length > 500) s.gamify.events.splice(0, s.gamify.events.length - 500);
   });
+  haptic('success');
   checkAchievements();
   const after = levelInfo().level;
   if (after > before) toast(`🎉 Новый уровень: ${after} — ${levelTitle(after)}`, 3000);

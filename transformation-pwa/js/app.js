@@ -2,6 +2,7 @@ import { store } from './store.js';
 import { h } from './util.js';
 import * as util from './util.js';
 import * as gamify from './gamify.js';
+import { haptic } from './haptics.js';
 
 // Контракт вью: файл js/views/<id>.js экспортирует
 //   export function render(root, ctx) { ... ; return optionalCleanup }
@@ -12,6 +13,7 @@ export const ROUTES = [
   { id: 'workout', title: 'Спорт', icon: '💪', nav: true },
   { id: 'learn', title: 'Знания', icon: '🧠', nav: true },
   { id: 'more', title: 'Ещё', icon: '☰', nav: true },
+  { id: 'insights', title: 'Подсказки', icon: '💡' },
   { id: 'challenge', title: 'Челлендж 12 недель', icon: '🏆' },
   { id: 'activity', title: 'Активность', icon: '📈' },
   { id: 'health', title: 'Здоровье', icon: '❤️' },
@@ -39,6 +41,7 @@ async function show() {
   if (typeof cleanup === 'function') { try { cleanup(); } catch (e) { console.error(e); } }
   cleanup = null;
   main.replaceChildren();
+  main.classList.remove('enter'); void main.offsetWidth; main.classList.add('enter'); // плавное появление экрана
   document.title = route.title + ' · Трансформация';
   nav.querySelectorAll('a').forEach(a => a.classList.toggle('active', a.dataset.id === (route.nav ? route.id : 'more')));
   if (!store.get().profile.onboarded && route.id !== 'plan') { return navigate('plan'); }
@@ -95,6 +98,9 @@ function fitBadge() {
 new MutationObserver(fitBadge).observe(document.body, { childList: true });
 addEventListener('resize', fitBadge);
 setTimeout(fitBadge, 600); setTimeout(fitBadge, 2000);
+
+// Лёгкий вибро-отклик на нажатия кнопок, ссылок меню, чипов и чекбоксов
+document.addEventListener('click', e => { if (e.target.closest('button, #nav a, a.card, .chip, input[type=checkbox]')) haptic('light'); }, { passive: true });
 
 addEventListener('hashchange', show);
 show();
