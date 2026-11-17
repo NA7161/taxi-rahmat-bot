@@ -14,7 +14,7 @@ const RANGES = {
 const CSS = `
 .hl-days{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:thin}
 .hl-days .chip{flex:0 0 auto;min-width:54px;text-align:center;line-height:1.25;cursor:pointer}
-.hl-days .chip.on{background:var(--accent,#4f7cff);color:#fff;border-color:transparent}
+.hl-days .chip.on{background:var(--primary,#1d4ed8);color:var(--primary-ink,#fff);border-color:transparent}
 .hl-days .chip small{display:block;opacity:.75;font-size:11px}
 .hl-days .chip .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.6;margin-left:3px}
 .hl-grid{display:grid;gap:12px}
@@ -24,8 +24,8 @@ const CSS = `
 .hl-stepper .btn{min-width:44px;min-height:44px;font-size:22px;line-height:1}
 .hl-big{font-size:26px;font-weight:700;min-width:70px;text-align:center}
 .hl-glasses{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
-.hl-glass{width:14px;height:20px;border-radius:2px 2px 5px 5px;border:1.5px solid #4aa3e8;background:transparent}
-.hl-glass.on{background:#4aa3e8}
+.hl-glass{width:14px;height:20px;border-radius:2px 2px 5px 5px;border:1.5px solid var(--primary,#4aa3e8);background:transparent}
+.hl-glass.on{background:var(--primary,#4aa3e8)}
 .hl-num{width:110px;text-align:right}
 .hl-moods{display:flex;gap:6px}
 .hl-moods button{font-size:26px;min-width:46px;min-height:46px;border-radius:12px;border:2px solid transparent;background:transparent;cursor:pointer;opacity:.55}
@@ -271,14 +271,14 @@ export function render(root, ctx) {
           onclick: () => { range = r; redraw(); },
         }, `${r} дн.`)))),
       h('div', null, h('h3', null, 'Сон, часы'), empty(sleep) ? noData
-        : chart({ keys, series: [{ vals: sleep, kind: 'bar', color: '#7a6cf0' }], min: 0, max: sMax, goal: hl.goals.sleep, label: 'График сна', fmtY: v => fmt(v, 0) }),
+        : chart({ keys, series: [{ vals: sleep, kind: 'bar', color: 'var(--primary)' }], min: 0, max: sMax, goal: hl.goals.sleep, label: 'График сна', fmtY: v => fmt(v, 0) }),
         empty(sleep) ? null : h('div', { class: 'hl-note' }, `Зелёная линия: цель ${fmt(hl.goals.sleep)} ч.`)),
       h('div', null, h('h3', null, 'Вес, кг'), empty(weight) ? noData
-        : chart({ keys, series: [{ vals: weight, kind: 'line', color: '#999', width: 1, dots: true, opacity: .8 }, { vals: ma, kind: 'line', color: '#e8743b', width: 2.5 }], min: wMin, max: wMax, label: 'График веса' }),
+        : chart({ keys, series: [{ vals: weight, kind: 'line', color: 'var(--muted)', width: 1, dots: true, opacity: .8 }, { vals: ma, kind: 'line', color: 'var(--highlight)', width: 2.5 }], min: wMin, max: wMax, label: 'График веса' }),
         empty(weight) ? null : h('div', { class: 'hl-note' }, 'Серые точки: ежедневные замеры (они шумят из-за воды, еды и времени суток). Оранжевая линия: скользящее среднее за 7 дней.'),
         h('div', null, trendText)),
       h('div', null, h('h3', null, 'Настроение'), empty(mood) ? noData
-        : chart({ keys, series: [{ vals: mood, kind: 'bar', color: '#f0a93c' }], min: 0, max: 5, label: 'График настроения', fmtY: v => fmt(v, 0) })));
+        : chart({ keys, series: [{ vals: mood, kind: 'bar', color: 'var(--highlight)' }], min: 0, max: 5, label: 'График настроения', fmtY: v => fmt(v, 0) })));
   }
 
   function statsCard(hl) {

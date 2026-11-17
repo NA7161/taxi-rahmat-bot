@@ -1,5 +1,5 @@
 /* Service worker: офлайн app shell. Версию кэша менять при изменении логики SW. */
-const VERSION = 'v2';
+const VERSION = 'v5';
 const CACHE = 'transformation-' + VERSION;
 const PRECACHE = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest',

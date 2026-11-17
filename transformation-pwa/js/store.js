@@ -19,6 +19,8 @@ export const DEFAULTS = {
   lang: { target: 'en', progress: {} }, // progress: {lessonId:{done:true,score:0..1,date}}
   // владелец: gamify.js
   gamify: { xp: 0, events: [], achievements: [] }, // events: [{t,xp,reason}]
+  // владелец: views/challenge.js
+  challenge: { start: null, weeklyGoal: 100 }, // start: 'YYYY-MM-DD' | null; weeklyGoal: XP в неделю
   // владелец: views/settings.js
   settings: { theme: 'auto', reminders: { enabled: false, time: '09:00' } },
 };

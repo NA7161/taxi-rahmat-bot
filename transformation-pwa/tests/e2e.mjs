@@ -8,7 +8,7 @@ const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const ROUTES = ['home', 'habits', 'workout', 'learn', 'health', 'languages', 'plan', 'settings'];
+const ROUTES = ['home', 'habits', 'workout', 'learn', 'health', 'languages', 'plan', 'settings', 'challenge', 'activity', 'insights'];
 const results = []; // {name, ok, why}
 const rec = (name, ok, why = '') => { results.push({ name, ok, why }); console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${why ? '  -> ' + why : ''}`); };
 
