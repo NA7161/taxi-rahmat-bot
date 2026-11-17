@@ -23,15 +23,15 @@ const CSS = `
 .plan-radar{display:block;width:100%;max-width:340px;margin:0 auto}
 .plan-radar text{font-size:11px;fill:currentColor}
 .plan-grid{fill:none;stroke:currentColor;stroke-opacity:.18}
-.plan-area{fill:#4f8cff;fill-opacity:.3;stroke:#4f8cff;stroke-width:2}
-.plan-dot{fill:#4f8cff}
+.plan-area{fill:var(--accent, #1f6b64);fill-opacity:.3;stroke:var(--accent, #1f6b64);stroke-width:2}
+.plan-dot{fill:var(--accent, #1f6b64)}
 .plan-bar{height:8px;border-radius:4px;background:rgba(128,128,128,.25);overflow:hidden}
-.plan-bar>i{display:block;height:100%;background:#4f8cff;border-radius:4px}
+.plan-bar>i{display:block;height:100%;background:var(--accent, #1f6b64);border-radius:4px}
 .plan-sph{display:grid;grid-template-columns:110px 1fr 24px;align-items:center;gap:8px;margin:6px 0}
 .plan-sph input{width:100%}
 .plan-chips{display:flex;flex-wrap:wrap;gap:6px}
 .plan-chips .chip{cursor:pointer}
-.plan-chips .chip.on{outline:2px solid #4f8cff}
+.plan-chips .chip.on{outline:2px solid var(--accent, #1f6b64)}
 .plan-step{display:flex;align-items:center;gap:8px;padding:4px 0}
 .plan-step span{flex:1}
 .plan-done{text-decoration:line-through;opacity:.6}

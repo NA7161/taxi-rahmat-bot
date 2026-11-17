@@ -116,7 +116,7 @@ const CSS = `
 .wk-warn{font-size:.85rem;opacity:.85;border-left:4px solid #f59e0b}
 .wk-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 .wk-tabs .chip{cursor:pointer;min-height:40px}
-.wk-tabs .chip.on,.wk-pick .chip.on{background:var(--accent,#4f8cff);color:#fff}
+.wk-tabs .chip.on,.wk-pick .chip.on{background:var(--accent,var(--accent, #1f6b64));color:#fff}
 .wk-stats{display:flex;gap:10px;margin:12px 0}
 .wk-stats .card{flex:1;text-align:center}
 .wk-big{font-size:1.8rem;font-weight:700;line-height:1.1}
@@ -137,7 +137,7 @@ const CSS = `
 .wk-act .row-2{display:flex;gap:10px}
 .wk-act .row-2 .btn{min-height:52px;font-size:1rem;flex:1}
 .wk-bars text{font-size:10px;fill:currentColor;opacity:.75}
-.wk-bar{fill:var(--accent,#4f8cff)}
+.wk-bar{fill:var(--accent,var(--accent, #1f6b64))}
 .wk-set{display:inline-block;margin:2px 6px 2px 0;padding:2px 8px;border-radius:10px;background:rgba(128,128,128,.18);font-size:.85rem}
 `;
 function ensureCss() {
@@ -409,7 +409,7 @@ export function render(root, ctx) {
         h('div', { class: 'card' }, h('div', { class: 'wk-big' }, String(st.streakWeeks)), h('div', { class: 'wk-small' }, 'недель подряд'))),
       h('div', { class: 'wk-tabs', role: 'tablist' }, tabs.map(([k, v]) =>
         h('button', { class: 'chip' + (tab === k ? ' on' : ''), type: 'button', role: 'tab', 'aria-selected': tab === k ? 'true' : 'false', onclick: () => { tab = k; draw(); } }, v))),
-      tab === 'programs' ? programsTab() : tab === 'history' ? historyTab() : recordsTab());
+      ...(tab === 'programs' ? programsTab() : tab === 'history' ? historyTab() : recordsTab()));
   }
 
   function draw() {
