@@ -77,7 +77,7 @@ const CSS = `
 .hb-item{display:flex;flex-direction:column;gap:8px;padding:12px}
 .hb-main{display:flex;align-items:center;gap:12px}
 .hb-check{flex:none;width:48px;height:48px;border-radius:50%;border:2px solid currentColor;background:transparent;color:inherit;font-size:1.4rem;line-height:1;cursor:pointer;display:grid;place-items:center;opacity:.9}
-.hb-check[aria-pressed=true]{background:#22c55e;border-color:#22c55e;color:#fff;opacity:1}
+.hb-check[aria-pressed=true]{background:var(--success,#17653a);border-color:var(--success,#17653a);color:var(--bg,#fff);opacity:1}
 .hb-check[disabled]{opacity:.35;cursor:default}
 .hb-title{flex:1;min-width:0}
 .hb-name{font-weight:600;overflow-wrap:anywhere}
@@ -89,7 +89,7 @@ const CSS = `
 .hb-form label{font-size:.85rem;opacity:.8}
 .hb-chips{display:flex;flex-wrap:wrap;gap:6px}
 .hb-chips .chip{cursor:pointer;min-height:36px}
-.hb-chips .chip.on{background:#6366f1;color:#fff;border-color:#6366f1}
+.hb-chips .chip.on{background:var(--primary,#1d4ed8);color:var(--primary-ink,#fff);border-color:var(--primary,#1d4ed8)}
 .hb-tip{font-size:.82rem;padding:8px 10px;border-radius:10px;background:rgba(99,102,241,.14)}
 .hb-heat{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-width:320px}
 .hb-heat .hd{font-size:.7rem;text-align:center;opacity:.6}
@@ -99,7 +99,7 @@ const CSS = `
 .hb-cell.l3{background:rgba(34,197,94,.85)}
 .hb-cell.l4{background:#16a34a}
 .hb-cell.fut{background:transparent;border:1px dashed rgba(148,163,184,.3)}
-.hb-cell.now{outline:2px solid #6366f1}
+.hb-cell.now{outline:2px solid var(--primary,#1d4ed8)}
 .hb-cell.off{opacity:.45}
 .hb-empty{text-align:center;padding:20px 12px}
 `;

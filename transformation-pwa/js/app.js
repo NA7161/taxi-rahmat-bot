@@ -56,8 +56,23 @@ async function show() {
   window.scrollTo(0, 0);
 }
 
+// Линейные значки меню (svg), рисуются через createElementNS
+const NAV_ICONS = {
+  home: ['M3 11.5 12 4l9 7.5', 'M5 10v10h5v-6h4v6h5V10'],
+  habits: ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z', 'M8 12.5l2.8 2.8L16 9.8'],
+  workout: ['M6.5 6.5v11', 'M17.5 6.5v11', 'M3.5 9v6', 'M20.5 9v6', 'M6.5 12h11'],
+  learn: ['M4 5.5A1.5 1.5 0 0 1 5.5 4H20v13H5.5A1.5 1.5 0 0 0 4 18.5z', 'M4 18.5A1.5 1.5 0 0 0 5.5 20H20v-3'],
+  more: ['M4 7h16', 'M4 12h16', 'M4 17h16'],
+};
+function navIcon(id) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('class', 'ni'); svg.setAttribute('aria-hidden', 'true');
+  for (const d of NAV_ICONS[id] || []) { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); svg.append(p); }
+  return svg;
+}
 nav.replaceChildren(...ROUTES.filter(r => r.nav).map(r =>
-  h('a', { href: '#/' + r.id, 'data-id': r.id }, h('span', { class: 'ico', 'aria-hidden': 'true' }, r.icon), h('span', { class: 'lbl' }, r.title))));
+  h('a', { href: '#/' + r.id, 'data-id': r.id }, navIcon(r.id), h('span', { class: 'lbl' }, r.title))));
 
 // Разовый переход на новое (тёмно-синее) оформление; дальше тема меняется только в настройках.
 if (!store.get().settings.lookV2) store.update(s => { s.settings.theme = 'dark'; s.settings.lookV2 = true; });

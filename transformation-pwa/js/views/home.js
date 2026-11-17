@@ -60,30 +60,19 @@ function greeting(name) {
 }
 
 const MODULES = [
-  { file: './habits.js', fn: 'habitStats', title: '✅ Привычки' },
-  { file: './workout.js', fn: 'workoutStats', title: '💪 Спорт' },
-  { file: './health.js', fn: 'healthStats', title: '❤️ Здоровье' },
-  { file: './learn.js', fn: 'learnStats', title: '🧠 Знания' },
-  { file: './languages.js', fn: 'langStats', title: '🌍 Языки' },
+  { file: './habits.js', fn: 'habitStats', tiles: (r, n) => [
+    n(r.doneToday) && n(r.totalToday) ? { icon: '✅', val: `${r.doneToday}/${r.totalToday}`, label: 'привычек сегодня', pct: r.totalToday ? r.doneToday / r.totalToday : 0 } : null,
+    n(r.bestStreak) ? { icon: '🔥', val: r.bestStreak, label: 'лучшая серия, дн.' } : null].filter(Boolean) },
+  { file: './workout.js', fn: 'workoutStats', tiles: (r, n) => [
+    n(r.thisWeek) ? { icon: '💪', val: r.thisWeek, label: 'тренировок за неделю' } : null].filter(Boolean) },
+  { file: './health.js', fn: 'healthStats', tiles: (r, n) => [
+    n(r.water) ? { icon: '💧', val: n(r.waterGoal) ? `${r.water}/${r.waterGoal}` : r.water, label: 'стаканов воды', pct: n(r.waterGoal) && r.waterGoal ? r.water / r.waterGoal : null } : null,
+    n(r.sleep) ? { icon: '😴', val: `${r.sleep} ч`, label: 'сон сегодня' } : null].filter(Boolean) },
+  { file: './learn.js', fn: 'learnStats', tiles: (r, n) => [
+    n(r.due) ? { icon: '🧠', val: r.due, label: 'карточек к повторению' } : null].filter(Boolean) },
+  { file: './languages.js', fn: 'langStats', tiles: (r, n) => [
+    n(r.done) && n(r.total) ? { icon: '🌍', val: `${r.done}/${r.total}`, label: 'уроков пройдено', pct: r.total ? r.done / r.total : 0 } : null].filter(Boolean) },
 ];
-
-const LABELS = {
-  doneToday: 'сделано сегодня', totalToday: 'всего на сегодня', bestStreak: 'лучшая серия',
-  thisWeek: 'на этой неделе', streakWeeks: 'недель подряд',
-  water: 'стаканов воды', waterGoal: 'цель по воде', sleep: 'сон, ч', mood: 'настроение (1-5)',
-  due: 'к повторению', reviewedToday: 'повторено сегодня',
-  done: 'уроков пройдено', total: 'всего уроков',
-};
-
-function statBody(r) {
-  if (r == null) return null;
-  if (typeof r === 'string' || typeof r === 'number') return h('div', { class: 'hm-line' }, String(r));
-  if (typeof r !== 'object') return null;
-  const parts = Object.entries(r).filter(([, v]) => ['string', 'number', 'boolean'].includes(typeof v));
-  if (!parts.length) return null;
-  return h('div', { class: 'hm-stat' }, parts.slice(0, 6).map(([k, v]) =>
-    h('div', { class: 'hm-kv' }, h('b', null, typeof v === 'boolean' ? (v ? 'да' : 'нет') : String(v)), h('span', null, LABELS[k] || k))));
-}
 
 function weekChart(events) {
   const days = [];
@@ -111,53 +100,74 @@ export function render(root, ctx) {
   if (!document.getElementById('home-css')) {
     const st = h('style', { id: 'home-css' });
     st.textContent = `
-.hm-hero{display:flex;flex-direction:column;gap:10px}
-.hm-hello{font-size:1.4rem;font-weight:700;margin:0}
-.hm-sub{opacity:.7;font-size:.9rem}
-.hm-lvl{display:flex;justify-content:space-between;align-items:baseline;font-weight:600}
-.hm-track{height:10px;border-radius:6px;background:rgba(128,128,128,.25);overflow:hidden}
-.hm-fill{height:100%;border-radius:6px;background:var(--primary,#1f6b64);transition:width .4s}
-.hm-sec{margin:18px 0 8px;font-size:1.05rem}
-.hm-pri{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.hm-pri input[type=text]{flex:1;min-width:0}
-.hm-pri input[type=checkbox]{width:24px;height:24px;flex:none}
+.hm-hero{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:16px;
+ background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 28%,var(--surface)),var(--surface) 72%)}
+.hm-hello{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin:0 0 4px;line-height:1.2}
+.hm-sub{color:var(--muted);font-size:.9rem}
+.hm-badge{display:inline-block;margin-top:12px;padding:5px 12px;border-radius:999px;background:var(--primary-soft);color:var(--primary);font-weight:700;font-size:.8rem}
+.hm-ring{flex:none;width:96px;height:96px}
+.hm-ring .trk{stroke:var(--surface-2)}
+.hm-ring .val{stroke:var(--highlight)}
+.hm-ring .lv{fill:var(--text);font-size:26px;font-weight:800}
+.hm-ring .xp{fill:var(--muted);font-size:9.5px}
+.hm-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.hm-head h2{margin:0}
+.hm-count{color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.hm-pri{display:flex;align-items:center;gap:12px;margin:0}
+.hm-pri input[type=text]{flex:1;min-width:0;margin:0;background:transparent;border:0;border-bottom:1px solid var(--input-border);border-radius:0;padding-left:2px}
 .hm-pri.done input[type=text]{text-decoration:line-through;opacity:.6}
-.hm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.hm-mod h3{margin:0 0 6px;font-size:.95rem}
-.hm-stat{display:flex;flex-wrap:wrap;gap:6px 14px}
-.hm-kv{display:flex;flex-direction:column}.hm-kv b{font-size:1.1rem}.hm-kv span{font-size:.72rem;opacity:.65}
-.hm-quote{font-style:italic;line-height:1.45}
+.hm-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hm-tile{margin:0;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;min-width:0}
+.hm-tile .ti{font-size:1.3rem;line-height:1;grid-row:1/3;align-self:center}
+.hm-tile b{font-size:1.45rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.15}
+.hm-tile .l{color:var(--muted);font-size:.78rem;line-height:1.25}
+.hm-tile .mini{grid-column:1/3;height:5px;border-radius:6px;background:var(--surface-2);overflow:hidden;margin-top:8px}
+.hm-tile .mini i{display:block;height:100%;background:var(--highlight);border-radius:6px}
+.hm-quote{margin:0;font-style:italic;line-height:1.5;padding-left:14px;border-left:3px solid var(--highlight)}
 .hm-chart{width:100%;height:auto;display:block}
-.hm-bar{fill:#8892b0;opacity:.6}.hm-bar.today{fill:#6c8cff;opacity:1}
-.hm-val,.hm-day{font-size:10px;fill:currentColor;opacity:.75}
-.hm-ach{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
-.hm-a{display:flex;gap:8px;align-items:center;padding:8px}
+.hm-bar{fill:var(--primary);opacity:.55}.hm-bar.today{fill:var(--highlight);opacity:1}
+.hm-val,.hm-day{font-size:10px;fill:currentColor;opacity:.8}
+.hm-lvl{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;margin-bottom:8px}
+.hm-ach{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.hm-a{display:flex;gap:10px;align-items:center;padding:12px;margin:0}
 .hm-a.locked{opacity:.4;filter:grayscale(1)}
-.hm-a .ai{font-size:1.5rem}.hm-a b{display:block;font-size:.85rem}.hm-a small{opacity:.7;font-size:.72rem}
+.hm-a .ai{font-size:1.5rem}.hm-a b{display:block;font-size:.85rem}.hm-a small{color:var(--muted);font-size:.72rem}
 `;
     document.head.append(st);
   }
 
   const heroBox = h('div', { class: 'card hm-hero' });
   const priBox = h('div', { class: 'card' });
-  const modBox = h('div', { class: 'hm-grid' });
+  const modBox = h('div', { class: 'hm-tiles' });
   const chartBox = h('div', { class: 'card' });
   const achBox = h('div', { class: 'hm-ach' });
-  const achTitle = h('h2', { class: 'hm-sec' }, 'Достижения');
+  const achTitle = h('h2', null, 'Достижения');
+
+  function ring(pct, level, xpText) {
+    const R = 38, C = 2 * Math.PI * R;
+    return svg('svg', { class: 'hm-ring', viewBox: '0 0 96 96', role: 'img', 'aria-label': `Уровень ${level}, ${xpText}` },
+      svg('circle', { class: 'trk', cx: 48, cy: 48, r: R, fill: 'none', 'stroke-width': 8 }),
+      svg('circle', { class: 'val', cx: 48, cy: 48, r: R, fill: 'none', 'stroke-width': 8, 'stroke-linecap': 'round',
+        'stroke-dasharray': C.toFixed(1), 'stroke-dashoffset': (C * (1 - pct / 100)).toFixed(1), transform: 'rotate(-90 48 48)' }),
+      svg('text', { class: 'lv', x: 48, y: 52, 'text-anchor': 'middle' }, level),
+      svg('text', { class: 'xp', x: 48, y: 66, 'text-anchor': 'middle' }, xpText));
+  }
 
   function drawHero() {
     const s = store.get(), li = gamify.levelInfo();
     const pct = Math.min(100, Math.round((li.xpInLevel / li.xpForNext) * 100));
     heroBox.replaceChildren(
-      h('h1', { class: 'hm-hello' }, greeting(s.profile.name)),
-      h('div', { class: 'hm-sub' }, new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })),
-      h('div', { class: 'hm-lvl' }, h('span', null, `Уровень ${li.level}${li.title ? ' · ' + li.title : ''}`), h('span', null, `${li.xpInLevel} / ${li.xpForNext} XP`)),
-      h('div', { class: 'hm-track', role: 'progressbar', 'aria-valuenow': pct, 'aria-valuemin': 0, 'aria-valuemax': 100 }, h('div', { class: 'hm-fill', style: `width:${pct}%` })));
+      h('div', null,
+        h('h1', { class: 'hm-hello' }, greeting(s.profile.name)),
+        h('div', { class: 'hm-sub' }, new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })),
+        h('span', { class: 'hm-badge' }, li.title || `Уровень ${li.level}`)),
+      ring(pct, li.level, `${li.xpInLevel}/${li.xpForNext} XP`));
   }
 
   function drawPri() {
     const p = loadPri();
-    priBox.replaceChildren(h('h2', { style: 'margin:0 0 10px;font-size:1.05rem' }, '🎯 Три приоритета дня'),
+    const count = h('span', { class: 'hm-count' }, `${p.items.filter(x => x.done).length}/${p.items.length}`);
+    priBox.replaceChildren(h('div', { class: 'hm-head' }, h('h2', null, 'Приоритеты дня'), count),
       ...p.items.map((it, i) => {
         const row = h('div', { class: 'hm-pri' + (it.done ? ' done' : '') });
         const cb = h('input', { type: 'checkbox', 'aria-label': 'Выполнено ' + (i + 1) });
@@ -169,6 +179,7 @@ export function render(root, ctx) {
           if (cb.checked && !it.text.trim()) { cb.checked = false; inp.focus(); return; }
           const was = it.done; it.done = cb.checked; savePri(p);
           row.classList.toggle('done', it.done);
+          count.textContent = `${p.items.filter(x => x.done).length}/${p.items.length}`;
           if (it.done && !was && !it.rewarded) { it.rewarded = true; savePri(p); gamify.awardXP(5, 'Приоритет дня'); drawHero(); drawChart(); }
         });
         row.append(cb, inp);
@@ -178,14 +189,20 @@ export function render(root, ctx) {
 
   function drawMods() {
     modBox.replaceChildren();
-    for (const m of MODULES) {
-      import(m.file).then(mod => {
-        if (dead || typeof mod[m.fn] !== 'function') return;
-        const body = statBody(mod[m.fn](store.get()));
-        if (!body) return;
-        modBox.append(h('div', { class: 'card hm-mod' }, h('h3', null, m.title), body));
-      }).catch(() => { /* модуль недоступен: блок скрыт */ });
-    }
+    const num = v => typeof v === 'number' && isFinite(v);
+    Promise.all(MODULES.map(m => import(m.file).then(mod => {
+      if (typeof mod[m.fn] !== 'function') return [];
+      const r = mod[m.fn](store.get());
+      return r && typeof r === 'object' ? m.tiles(r, num) : [];
+    }).catch(() => []))).then(groups => {
+      if (dead) return;
+      for (const t of groups.flat()) {
+        modBox.append(h('div', { class: 'card hm-tile' },
+          h('span', { class: 'ti', 'aria-hidden': 'true' }, t.icon), h('b', null, String(t.val)), h('span', { class: 'l' }, t.label),
+          t.pct != null ? h('div', { class: 'mini', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': Math.round(t.pct * 100) },
+            h('i', { style: `width:${Math.min(100, Math.round(t.pct * 100))}%` })) : null));
+      }
+    });
   }
 
   function drawChart() {
@@ -202,10 +219,9 @@ export function render(root, ctx) {
   }
 
   const q = QUOTES[Math.floor(new Date().setHours(0, 0, 0, 0) / 864e5) % QUOTES.length];
-  root.append(heroBox, priBox,
-    h('div', { class: 'card' }, h('div', { class: 'hm-sub' }, 'Мысль дня'), h('div', { class: 'hm-quote' }, '«' + q + '»')),
-    h('h2', { class: 'hm-sec' }, 'Сводка'), modBox,
-    h('h2', { class: 'hm-sec' }, 'Неделя'), chartBox, achTitle, achBox);
+  root.append(heroBox, h('h2', null, 'Сегодня'), modBox, h('div', { style: 'height:12px' }), priBox,
+    h('div', { class: 'card' }, h('p', { class: 'hm-quote' }, '«' + q + '»')),
+    h('h2', null, 'Неделя'), chartBox, achTitle, achBox);
 
   checkAchievements();
   drawHero(); drawPri(); drawMods(); drawChart(); drawAch();

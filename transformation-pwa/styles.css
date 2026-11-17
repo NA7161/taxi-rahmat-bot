@@ -20,7 +20,7 @@
   --shadow: 0 1px 2px rgba(15, 23, 42, .06), 0 2px 8px rgba(15, 23, 42, .05);
   --radius: 14px;
   --radius-sm: 10px;
-  --nav-h: 64px;
+  --nav-h: 78px;
   --gap: 12px;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
@@ -147,7 +147,7 @@ input[type="checkbox"], input[type="radio"] { width: 24px; height: 24px; accent-
 #toasts {
   position: fixed; left: 0; right: 0; z-index: 100; display: flex; flex-direction: column;
   align-items: center; gap: 8px; pointer-events: none; padding: 0 16px;
-  bottom: calc(var(--nav-h) + var(--badge-h, 0px) + env(safe-area-inset-bottom) + 84px);
+  bottom: calc(var(--nav-h) + var(--badge-h, 0px) + env(safe-area-inset-bottom) + 14px);
 }
 .toast {
   max-width: 480px; padding: 12px 16px; border-radius: var(--radius-sm); font-weight: 500;
@@ -214,3 +214,68 @@ body::after {
 .feed li { display: flex; justify-content: space-between; gap: 10px; padding: 10px 12px; background: var(--surface-2); border-radius: var(--radius-sm); }
 .feed .xp { color: var(--highlight); font-weight: 700; white-space: nowrap; }
 .feed-day { margin: 14px 2px 6px; color: var(--muted); font-weight: 600; font-size: .9rem; }
+
+/* ===== Современное оформление ===== */
+:root { --radius: 20px; --radius-sm: 14px; }
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(120% 55% at 0% -8%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 62%),
+    radial-gradient(90% 45% at 100% 106%, color-mix(in srgb, var(--highlight) 9%, transparent), transparent 62%);
+  background-attachment: fixed;
+}
+h1 { font-size: 1.85rem; font-weight: 800; letter-spacing: -.02em; margin: 4px 0 18px; }
+h2 { font-size: .78rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin: 26px 2px 10px; }
+.card h2, .sheet h2 { font-size: 1.15rem; letter-spacing: -.01em; text-transform: none; color: var(--text); margin: 0 0 10px; }
+h3 { font-size: 1rem; font-weight: 700; }
+
+.card {
+  padding: 18px; border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 96%, white 4%), var(--surface));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .05) inset, 0 12px 28px -16px rgba(15, 23, 42, .45);
+}
+a.card.row:active { background: var(--surface-2); }
+
+.btn { min-height: 48px; font-weight: 700; border-radius: var(--radius-sm); }
+.btn-primary {
+  border-color: transparent;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 90%, white 10%), var(--primary));
+  box-shadow: 0 10px 20px -10px color-mix(in srgb, var(--primary) 80%, transparent);
+}
+.btn-danger { border-color: transparent; }
+.chip { min-height: 42px; padding: 8px 18px; font-weight: 600; background: color-mix(in srgb, var(--surface) 85%, transparent); }
+.chip.active { box-shadow: 0 8px 16px -10px color-mix(in srgb, var(--primary) 80%, transparent); }
+
+.input, .select, .textarea, input[type="text"], input[type="number"], input[type="date"],
+input[type="time"], input[type="search"], input[type="email"], select, textarea {
+  border-radius: var(--radius-sm); background: color-mix(in srgb, var(--surface-2) 55%, var(--surface));
+}
+input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; display: inline-grid; place-content: center;
+  width: 28px; height: 28px; border: 2px solid var(--input-border); border-radius: 50%; background: transparent;
+}
+input[type="checkbox"]:checked { background: var(--primary); border-color: var(--primary); }
+input[type="checkbox"]:checked::after {
+  content: ""; width: 11px; height: 6px; margin-top: -2px;
+  border-left: 2.5px solid var(--primary-ink); border-bottom: 2.5px solid var(--primary-ink); transform: rotate(-45deg);
+}
+
+.progress { height: 10px; border: 0; background: var(--surface-2); }
+.progress > div { background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 60%, var(--highlight))); }
+
+/* Плавающее меню со значками */
+#nav {
+  left: 12px; right: 12px; bottom: calc(var(--badge-h, 0px) + 10px + env(safe-area-inset-bottom));
+  padding: 6px; gap: 2px; border: 1px solid var(--border); border-radius: 24px;
+  background: color-mix(in srgb, var(--surface) 84%, transparent);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  box-shadow: 0 16px 34px -12px rgba(0, 0, 0, .5);
+}
+#nav a { min-height: 56px; border-radius: 18px; gap: 3px; font-size: .68rem; padding: 6px 2px; transition: background-color .15s ease, color .15s ease; }
+#nav a.active { background: var(--primary-soft); color: var(--primary); }
+#nav a.active .ni { transform: translateY(-1px); }
+#nav .ni { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+#toasts { bottom: calc(var(--nav-h) + var(--badge-h, 0px) + env(safe-area-inset-bottom) + 14px); }
+.toast { border-radius: 14px; font-weight: 600; box-shadow: 0 12px 28px -10px rgba(0, 0, 0, .55); }

@@ -41,6 +41,7 @@ export function toast(msg, ms = 2200) {
   if (!box) { box = h('div', { id: 'toasts', 'aria-live': 'polite' }); document.body.append(box); }
   const t = h('div', { class: 'toast' }, msg);
   box.append(t);
+  while (box.children.length > 2) box.firstChild.remove(); // стопка уведомлений закрывает контент
   setTimeout(() => t.remove(), ms);
 }
 

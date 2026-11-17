@@ -23,8 +23,8 @@ const CSS = `
 .set-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
 .set-row .input{flex:1;min-width:120px}
 .set-note{font-size:.85rem;opacity:.75;margin:8px 0 0;line-height:1.4}
-.set-err{color:#dc2626;font-size:.9rem;margin:8px 0 0}
-.set-danger{border:1px solid #dc2626;color:#dc2626;background:transparent}
+.set-err{color:var(--danger,#dc2626);font-size:.9rem;margin:8px 0 0}
+.set-danger{border:1px solid var(--danger,#dc2626);color:var(--danger,#dc2626);background:transparent}
 .chip.set-on{outline:2px solid currentColor;font-weight:600}
 `;
 
