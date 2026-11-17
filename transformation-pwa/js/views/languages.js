@@ -92,7 +92,10 @@ export function render(root, ctx) {
   function addToCards(les) {
     let added = 0;
     store.update(s => {
-      const deck = `${lang().name}: ${les.title}`;
+      // learn.js ищет колоду по id в learn.decks, поэтому создаём запись колоды и ссылаемся на её id
+      const deck = 'lang-' + les.id;
+      if (!Array.isArray(s.learn.decks)) s.learn.decks = [];
+      if (!s.learn.decks.some(d => d.id === deck)) s.learn.decks.push({ id: deck, name: `${lang().name}: ${les.title}` });
       const have = new Set(s.learn.cards.map(c => c.deck + '|' + String(c.front).toLowerCase()));
       for (const wd of les.words) {
         const key = deck + '|' + wd.en.toLowerCase();

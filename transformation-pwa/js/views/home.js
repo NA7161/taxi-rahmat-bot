@@ -67,6 +67,14 @@ const MODULES = [
   { file: './languages.js', fn: 'langStats', title: '🌍 Языки' },
 ];
 
+const LABELS = {
+  doneToday: 'сделано сегодня', totalToday: 'всего на сегодня', bestStreak: 'лучшая серия',
+  thisWeek: 'на этой неделе', streakWeeks: 'недель подряд',
+  water: 'стаканов воды', waterGoal: 'цель по воде', sleep: 'сон, ч', mood: 'настроение (1-5)',
+  due: 'к повторению', reviewedToday: 'повторено сегодня',
+  done: 'уроков пройдено', total: 'всего уроков',
+};
+
 function statBody(r) {
   if (r == null) return null;
   if (typeof r === 'string' || typeof r === 'number') return h('div', { class: 'hm-line' }, String(r));
@@ -74,7 +82,7 @@ function statBody(r) {
   const parts = Object.entries(r).filter(([, v]) => ['string', 'number', 'boolean'].includes(typeof v));
   if (!parts.length) return null;
   return h('div', { class: 'hm-stat' }, parts.slice(0, 6).map(([k, v]) =>
-    h('div', { class: 'hm-kv' }, h('b', null, typeof v === 'boolean' ? (v ? 'да' : 'нет') : String(v)), h('span', null, k))));
+    h('div', { class: 'hm-kv' }, h('b', null, typeof v === 'boolean' ? (v ? 'да' : 'нет') : String(v)), h('span', null, LABELS[k] || k))));
 }
 
 function weekChart(events) {
@@ -108,7 +116,7 @@ export function render(root, ctx) {
 .hm-sub{opacity:.7;font-size:.9rem}
 .hm-lvl{display:flex;justify-content:space-between;align-items:baseline;font-weight:600}
 .hm-track{height:10px;border-radius:6px;background:rgba(128,128,128,.25);overflow:hidden}
-.hm-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#6c8cff,#a855f7);transition:width .4s}
+.hm-fill{height:100%;border-radius:6px;background:var(--primary,#1f6b64);transition:width .4s}
 .hm-sec{margin:18px 0 8px;font-size:1.05rem}
 .hm-pri{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .hm-pri input[type=text]{flex:1;min-width:0}
